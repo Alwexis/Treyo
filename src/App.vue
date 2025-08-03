@@ -2,4 +2,9 @@
     <router-view />
 </template>
 
-<script setup></script>
+<script setup>
+import { useBoardStore } from './stores/boards';
+
+const boardStore = useBoardStore()
+boardStore.load();
+</script>

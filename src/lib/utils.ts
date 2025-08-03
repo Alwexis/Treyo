@@ -1,3 +1,5 @@
+import type { Board } from "./types";
+
 export function isAuthenticated(): boolean {
     return !!localStorage.getItem('session')
 }
@@ -20,4 +22,9 @@ export function dateToHumanReadable(iso: string): string {
         month: 'short',
         year: 'numeric'
     })
+}
+
+export function exportBoard(board: Board): string {
+    const blob = new Blob([JSON.stringify(board, null, 2)], { type: 'application/json' });
+    return URL.createObjectURL(blob);
 }
