@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed, ref, shallowRef, type Component } from "vue";
-import { useAuth } from "../composables/auth";
+import { computed, ref, shallowRef, useTemplateRef, type Component } from "vue";
+import { useAuth } from "../composables/useAuth";
 import { useBoardStore } from "../stores/boards";
 import {
     Blocks,
@@ -16,6 +16,7 @@ import {
 import Dialog from "./Dialog.vue";
 import CreateBoardDialog from "./dialogs/CreateBoardDialog.vue";
 import DeleteBoardDialog from "./dialogs/DeleteBoardDialog.vue";
+import { readJSONFromFile } from "../lib/utils";
 
 const { session, logOut } = useAuth();
 const boardStore = useBoardStore();
@@ -29,6 +30,8 @@ const dialogProps = ref<Record<string, any>>({});
 const dialogTitle = ref<string>("");
 
 const boards = computed(() => boardStore.boards);
+
+const importInput = useTemplateRef("import-input")
 
 const classes = computed(() => ({
     "grid grid-rows-[auto_1fr_auto] h-dvh overflow-hidden transition-all duration-300 bg-neutral-100 text-black dark:bg-neutral-900 dark:text-white py-4":
@@ -51,6 +54,18 @@ const closeDialog = () => {
     dialogProps.value = {};
     dialogTitle.value = "";
 };
+
+const handleFileUpload = async (e: Event) => {
+    const input = e.target as HTMLInputElement
+    if (!input.files?.length) return;
+
+    try {
+        const content = await readJSONFromFile(input.files[0])
+        boardStore.import(content);
+    } catch (err) {
+        console.log(err)
+    }
+}
 </script>
 
 <template>
@@ -62,6 +77,8 @@ const closeDialog = () => {
             @close="closeDialog"
         />
     </Dialog>
+
+    <input ref="import-input" type="file" accept=".json" @change="handleFileUpload" class="hidden">
 
     <aside :class="classes">
         <button
@@ -110,7 +127,7 @@ const closeDialog = () => {
                             <span>Exportar tablero</span>
                         </button>
                     </a>
-                    <button
+                    <button @click="importInput?.click()" type="button" aria-label="Importar un tablero"
                         class="flex items-center cursor-pointer transition-colors hover:bg-neutral-200 hover:dark:bg-neutral-800 w-full h-10 px-2 rounded-sm"
                     >
                         <FileUp class="w-5 mr-2" />
@@ -135,14 +152,14 @@ const closeDialog = () => {
                     </p>
                 </div>
                 <!-- Improve it whenever I create the global state & board service -->
-                <div v-else>
-                    <div
-                        class="flex items-center justify-between cursor-pointer transition-colors hover:bg-neutral-200 hover:dark:bg-neutral-800 w-full h-10 px-2 rounded-sm"
+                <div class="space-y-1" v-else>
+                    <div :data-active="boardStore.activeBoard?.id === board.id"
+                        class="flex items-center justify-between cursor-pointer transition-colors data-[active='true']:bg-neutral-200 data-[active='true']:dark:bg-neutral-800 hover:bg-neutral-200 hover:dark:bg-neutral-800 w-full h-10 px-2 rounded-sm"
                         v-for="board in boards"
                     >
-                        <button class="flex items-center w-full cursor-pointer text-start" @click="boardStore.setActiveBoard(board.id)">
+                        <button class="flex items-center w-full h-full cursor-pointer text-start" @click="boardStore.setActiveBoard(board.id)">
                             <LayoutDashboard class="w-4 mr-1.5" />
-                            <h3 class="line-clamp-1 w-fit">{{ board.title }}</h3>
+                            <h3 class="max-w-24 truncate">{{ board.title }}</h3>
                         </button>
 
                         <button

@@ -1,64 +1,60 @@
-import { defineStore } from 'pinia'
-import type { Card, Task, TaskGroup } from '../lib/types'
+import { defineStore } from "pinia";
+import type { Task } from "../lib/types";
+import { useBoardStore } from "./boards";
 
-export const useCardStore = defineStore('card', {
-    state: () => ({
-        selectedCard: null as Card | null,
-    }),
+export const useCardStore = defineStore("card", {
+  actions: {
+    addTask(boardId: string, cardId: string, task: Task) {
+      const boardStore = useBoardStore();
+      const board = boardStore.getBoardById(boardId);
+      if (!board) return;
 
-    getters: {
-        tasks: (state): Task[] =>
-            state.selectedCard?.tasks.flatMap(g => g.tasks) ?? [],
+      const card = board.cards.find((c) => c.id === cardId);
+      if (!card) return;
+
+      card.tasks.push(task);
+      boardStore.saveToStorage();
     },
 
-    actions: {
-        setCard(card: Card) {
-            this.selectedCard = structuredClone(card)
-        },
+    updateTask(
+      boardId: string,
+      cardId: string,
+      index: number,
+      partial: Partial<Task>
+    ) {
+      const boardStore = useBoardStore();
+      const board = boardStore.getBoardById(boardId);
+      if (!board) return;
 
-        clearCard() {
-            this.selectedCard = null
-        },
+      const card = board.cards.find((c) => c.id === cardId);
+      if (!card || !card.tasks[index]) return;
 
-        updateCard(partial: Partial<Card>) {
-            if (!this.selectedCard) return
-            this.selectedCard = { ...this.selectedCard, ...partial }
-        },
+      card.tasks[index] = { ...card.tasks[index], ...partial };
+      boardStore.saveToStorage();
+    },
 
-        addTaskGroup(group: TaskGroup) {
-            this.selectedCard?.tasks.push(group)
-        },
+    toggleTask(boardId: string, cardId: string, index: number) {
+      const boardStore = useBoardStore();
+      const board = boardStore.getBoardById(boardId);
+      if (!board) return;
 
-        addTaskToGroup(groupIndex: number, task: Task) {
-            this.selectedCard?.tasks[groupIndex]?.tasks.push(task)
-        },
+      const card = board.cards.find((c) => c.id === cardId);
+      if (!card || !card.tasks[index]) return;
 
-        toggleTask(groupIndex: number, taskIndex: number) {
-            const task = this.selectedCard?.tasks[groupIndex]?.tasks[taskIndex]
-            if (task) task.completed = !task.completed
-        },
+      card.tasks[index].completed = !card.tasks[index].completed;
+      boardStore.saveToStorage();
+    },
 
-        removeTaskGroup(groupIndex: number) {
-            this.selectedCard?.tasks.splice(groupIndex, 1)
-        },
+    removeTask(boardId: string, cardId: string, index: number) {
+      const boardStore = useBoardStore();
+      const board = boardStore.getBoardById(boardId);
+      if (!board) return;
 
-        removeTaskFromGroup(groupIndex: number, taskIndex: number) {
-            this.selectedCard?.tasks[groupIndex]?.tasks.splice(taskIndex, 1)
-        },
+      const card = board.cards.find((c) => c.id === cardId);
+      if (!card || !card.tasks[index]) return;
 
-        updateTaskGroup(groupIndex: number, partial: Partial<TaskGroup>) {
-            const group = this.selectedCard?.tasks[groupIndex]
-            if (!group) return
-            this.selectedCard!.tasks[groupIndex] = { ...group, ...partial }
-        },
-
-        updateTask(groupIndex: number, taskIndex: number, partial: Partial<Task>) {
-            const task = this.selectedCard?.tasks[groupIndex]?.tasks[taskIndex]
-            if (!task) return
-            this.selectedCard!.tasks[groupIndex].tasks[taskIndex] = {
-                ...task,
-                ...partial
-            }
-        },
-    }
-})
+      card.tasks.splice(index, 1);
+      boardStore.saveToStorage();
+    },
+  },
+});

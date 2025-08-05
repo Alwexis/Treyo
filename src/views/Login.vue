@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Eye, EyeClosed, Mail, RectangleEllipsis } from 'lucide-vue-next';
 import { computed, reactive, ref, watchEffect } from 'vue';
-import { useAuth } from '../composables/auth';
+import { useAuth } from '../composables/useAuth';
 import type { Credentials } from '../lib/types';
 
 const { logIn } = useAuth();

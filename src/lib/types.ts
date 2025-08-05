@@ -20,13 +20,6 @@ export interface Card {
     title: string;
     description?: string;
     tags?: string[];
-    tasks: TaskGroup[]
-}
-
-export interface TaskGroup {
-    id: string
-    title: string;
-    description?: string;
     tasks: Task[]
 }
 
