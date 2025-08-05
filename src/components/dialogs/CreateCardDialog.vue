@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { reactive, ref, watchEffect } from "vue";
+import { reactive, watchEffect } from "vue";
 import { useBoardStore } from "../../stores/boards";
 import type { Card } from "../../lib/types";
 

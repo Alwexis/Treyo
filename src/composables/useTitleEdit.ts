@@ -1,7 +1,7 @@
 import { onUnmounted, reactive, useTemplateRef } from "vue";
 
 export function useTitleEdit(onConfirm: (title: string) => void) {
-    const input = useTemplateRef("modify-card-title");
+    const input = useTemplateRef<any>("modify-card-title");
     const state = reactive({ status: false, title: "" })
 
     const start = () => {

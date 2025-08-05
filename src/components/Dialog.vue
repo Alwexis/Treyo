@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { X } from "lucide-vue-next";
-import { onUnmounted, watch, ref, Teleport } from "vue";
+import { onUnmounted, watch, ref } from "vue";
 
 const props = defineProps<{ open: boolean, title: string }>();
 

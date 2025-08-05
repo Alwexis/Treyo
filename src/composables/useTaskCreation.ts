@@ -1,7 +1,7 @@
 import { onUnmounted, reactive, useTemplateRef } from "vue";
 
 export function useTaskCreation(onConfirm: (title: string) => void) {
-    const input = useTemplateRef("new-task-input");
+    const input = useTemplateRef<any>("new-task-input");
     const state = reactive({ status: false, title: "" })
 
     const start = () => {
